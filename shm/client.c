@@ -92,17 +92,19 @@ int main() {
       char message[SHM_SIZE];
       *shm = CH_TYPING;
       printf("Enter message: ");
-      fgets(message, SHM_SIZE - 1 - 4, stdin);
-      s = shm + 1 + 4;
+      fgets(message, SHM_SIZE - 1, stdin);
+      s = shm + 1;
 
       int len = strlen(message) - 1;
       for (int i = 0; i < len; i++) {
         *s++ = message[i];
       }
-      s = shm + 1;
-      memcpy(s, (void *)(strlen(message) - 1), 4);
-      turn = 0;
+      *s++ = '\0';
 
+      turn = 0;
+      *shm = CH_WAIT;
+      while (*shm == CH_WAIT) {
+      }
     } else {
       printf("Opponent is typing");
       int n = 0;
@@ -111,18 +113,16 @@ int main() {
         printf(".");
         if (n == 3) {
           n = 0;
-          printf("\b\b\b");
+          printf("\b\b\b   \b\b\b");
         }
         n++;
         sleep(1);
       }
 
       printf("\n");
-      int len = 0;
 
-      memcpy((void *)&len, shm + 1, 4);
-
-      printf("%s", shm + 5);
+      printf("%s", shm + 1);
+      printf("\n");
 
       turn = 1;
     }
