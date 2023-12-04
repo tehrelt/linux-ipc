@@ -7,18 +7,16 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-void handler(int sig) {
-  if (sig == SIGINT) {
-    printf("\r\rINTERRUPTED BY USER\n");
-    _exit(1);
-  }
+void interrupt(int sig) {
+  printf("\r\rINTERRUPTED BY USER\n");
+  _exit(1);
 }
 
 int main() {
 
   printf("guide: ctrl+c for interrupt\n\n");
 
-  if (signal(SIGINT, &handler) == SIG_ERR) {
+  if (signal(SIGINT, &interrupt) == SIG_ERR) {
     perror("cannot bind handler to interrupt signal\n");
     exit(-1);
   }
