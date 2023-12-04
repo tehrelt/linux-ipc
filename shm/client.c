@@ -17,10 +17,13 @@
 #define CH_DISCONNECTED 12
 #define CH_TYPING 13
 
+#define SIG_DISCONNECTED -2
+
 #define OFFSET 1 + 30
 
 int shmid = -12;
 char *shm;
+char username[30];
 
 void handler(int sig) {
   if (shmid != -1 && *shm == CH_DISCONNECTED) {
@@ -31,8 +34,18 @@ void handler(int sig) {
     }
   }
 
-  if (sig == SIGINT)
-    printf("\r\rInterrupt by user\n");
+  if (sig == SIGINT) {
+    printf("\rInterrupt by user\n");
+    char *s = shm + 1;
+
+    int len = strlen(username) - 1;
+    for (int i = 0; i < len; i++) {
+      *s++ = username[i];
+    }
+    *s = '\0';
+
+  } else if (sig == SIG_DISCONNECTED)
+    printf("\rInterrupt by %s\n", shm + 1);
 
   *shm = CH_DISCONNECTED;
   exit(1);
@@ -42,7 +55,6 @@ int main() {
 
   printf("guide: press ctrl+c to interrupt\n");
 
-  char username[30];
   int turn = 0;
   char *s;
 
@@ -104,8 +116,11 @@ int main() {
       *shm = CH_TYPING;
       printf("Enter message: ");
       fgets(message, SHM_SIZE + ((OFFSET) * (-1)), stdin);
-      s = shm + OFFSET;
+      if (*shm == CH_DISCONNECTED) {
+        handler(SIG_DISCONNECTED);
+      }
 
+      s = shm + OFFSET;
       memcpy(shm + 1, username, strlen(username) - 1);
 
       int i = 0;
@@ -120,10 +135,6 @@ int main() {
         *s++ = message[i];
       }
       *s++ = '\0';
-
-      if (*shm == CH_DISCONNECTED) {
-        break;
-      }
 
       turn = 0;
       *shm = CH_WAIT;
@@ -151,7 +162,7 @@ int main() {
       printf("\n");
 
       if (*shm == CH_DISCONNECTED) {
-        break;
+        handler(SIG_DISCONNECTED);
       }
       turn = 1;
     }
