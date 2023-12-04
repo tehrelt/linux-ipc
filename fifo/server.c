@@ -2,13 +2,22 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-int main() {
-  if (mkfifo(FIFO_NAME, 0777) == -1) {
+int main(int argc, char **argv) {
+
+  if (argc < 2) {
+    printf("Usage: ./server.out pipe_name\n");
+    exit(-1);
+  }
+
+  char *pipe = argv[1];
+
+  if (mkfifo(pipe, 0777) == -1) {
     if (errno != EEXIST) {
       printf("cant create fifo\n");
       return 1;
@@ -23,7 +32,7 @@ int main() {
       printf("Waiting for client\n");
     }
 
-    int wrfd = open(FIFO_NAME, O_WRONLY);
+    int wrfd = open(pipe, O_WRONLY);
     if (wrfd == -1) {
       printf("Cannot open a FIFO\n");
       return 2;

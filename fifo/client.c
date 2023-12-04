@@ -9,10 +9,15 @@
 
 void interrupt(int sig) {
   printf("\r\rINTERRUPTED BY USER\n");
-  _exit(1);
+  exit(1);
 }
 
-int main() {
+int main(int argc, char **argv) {
+
+  if (argc < 2) {
+    printf("Usage: ./client.out pipe_name\n");
+    exit(-1);
+  }
 
   printf("guide: ctrl+c for interrupt\n\n");
 
@@ -21,6 +26,7 @@ int main() {
     exit(-1);
   }
 
+  char *pipe = argv[1];
   int first_msg = 1;
 
   while (1) {
@@ -29,21 +35,21 @@ int main() {
       printf("Connecting to server...\n");
     }
 
-    int fd = open(FIFO_NAME, O_RDONLY);
+    int fd = open(pipe, O_RDONLY);
     if (fd == -1) {
       printf("Cannot open a fifo\n");
       return 1;
-    }
-
-    if (first_msg) {
-      printf("Connection established\n");
-      first_msg = 0;
     }
 
     char buf[MAX_LEN];
 
     printf("Waiting for message...\n");
     read(fd, buf, MAX_LEN);
+
+    if (first_msg) {
+      printf("Connection established\n");
+      first_msg = 0;
+    }
 
     printf("Received message: %s\n", buf);
   }
