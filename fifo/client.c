@@ -9,7 +9,7 @@
 
 void interrupt(int sig) {
   printf("\r\rINTERRUPTED BY USER\n");
-  exit(1);
+  exit(-1);
 }
 
 int main(int argc, char **argv) {
@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
 
   char *pipe = argv[1];
   int first_msg = 1;
+  int fd = 0;
 
   while (1) {
 
@@ -35,7 +36,7 @@ int main(int argc, char **argv) {
       printf("Connecting to server...\n");
     }
 
-    int fd = open(pipe, O_RDONLY);
+    fd = open(pipe, O_RDONLY);
     if (fd == -1) {
       printf("Cannot open a fifo\n");
       return 1;
