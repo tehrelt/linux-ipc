@@ -6,47 +6,75 @@
 #include <unistd.h>
 #define MAX_LENGTH 256
 
+void debug(const char *message) { printf("[DEBUG] %s", message); }
+
 int main() {
   int fd[2]; // fd[0] - read  fd[1] - write
-  pid_t pid;
+  pid_t pid, cpid;
 
-  pipe(fd);
-  pid = fork();
+  char answer;
 
-  if (pid == -1) {
-    perror("cannot fork a process");
-    exit(errno);
-  }
+  do {
+    pipe(fd);
+    pid = fork(); // returns 0 to the child proccess and pid of child process to
+                  // the parent
 
-  if (pid == 0) { // fork-process
-    close(fd[0]); // closing read fd
+    cpid = getpid();
 
-    char buf[MAX_LENGTH];
-
-    printf("Enter a message: ");
-    scanf("%s", buf);
-
-    FILE *file = fopen("output.txt", "a");
-    if (file == NULL) {
-      printf("cannot open file\n");
-      exit(-1);
+    if (pid == -1) {
+      perror("cannot fork a process");
+      exit(errno);
     }
 
-    fwrite(buf, strlen(buf), 1, file);
-    fwrite("\n", strlen("\n"), 1, file);
-    write(fd[1], buf, strlen(buf) + 1); // writing to fd[1]
+    if (pid == 0) { // fork-process
+      close(fd[0]); // closing read fd
 
-    fclose(file);
+      char buf[MAX_LENGTH];
 
-    exit(0);
-  } else {        // main-process
-    close(fd[1]); // closing write fd
+      printf("Enter a message: ");
+      scanf("%s", buf);
 
-    char buf[MAX_LENGTH];
+      printf("[DEBUG][pid=%d] opening file output.txt with append mode\n",
+             cpid);
+      FILE *file = fopen("output.txt", "a");
+      if (file == NULL) {
+        printf("cannot open file\n");
+        exit(-1);
+      }
+      printf("[DEBUG][pid=%d] file successfuly opened\n", cpid);
+      ;
 
-    read(fd[0], buf, sizeof(buf));       // reading from fd[0]
-    printf("Written string: %s\n", buf); // printing result
-  }
+      fwrite(buf, strlen(buf), 1, file);
+      fwrite("\n", strlen("\n"), 1, file);
+
+      printf("[DEBUG][pid=%d] writing to fd[1]: %s\n", cpid, buf);
+      write(fd[1], buf, strlen(buf) + 1); // writing to fd[1]
+
+      fclose(file);
+      printf("[DEBUG][pid=%d] file output.txt closed\n", cpid);
+
+      exit(0);
+    } else {        // main-process
+      close(fd[1]); // closing write fd
+
+      char buf[MAX_LENGTH];
+
+      read(fd[0], buf, sizeof(buf)); // reading from fd[0]
+      printf("[DEBUG][pid=%d] read from fork-process %s\n", cpid, buf);
+
+      printf("Written string: %s\n", buf); // printing result
+    }
+
+    do {
+      printf("Want to enter one more message? (y/n) ");
+
+      scanf("%c", &answer);
+
+      if (answer != 'y' && answer != 'n') {
+        printf("Error! Press y or n\n");
+      }
+    } while (answer != 'y' && answer != 'n');
+  } while (answer != 'n');
 
   return 0;
 }
