@@ -39,8 +39,8 @@ int main() {
       write(fd[1], buf, strlen(buf) + 1); // writing to fd[1]
 
       exit(0);
-    } else { // main-process
-      printf("[DEBUG][pid=%d] forked pid = %d\n", cpid, pid);
+
+    } else {        // main-process
       close(fd[1]); // closing write fd
 
       char buf[MAX_LENGTH];
@@ -66,7 +66,15 @@ int main() {
     do {
       printf("[pid=%d]Want to enter one more message? (y/n) ", cpid);
 
-      scanf("%c", &answer);
+      fflush(stdin);
+
+      // scanf("%c", &answer);
+      answer = getchar();
+      int c;
+      while ((c = getchar()) != '\n' && c != EOF)
+        ;
+
+      fflush(stdin);
 
       if (answer != 'y' && answer != 'n') {
         printf("Error! Press y or n\n");
