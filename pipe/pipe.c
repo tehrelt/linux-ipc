@@ -27,12 +27,26 @@ int main() {
     }
 
     if (pid == 0) { // fork-process
+
       close(fd[0]); // closing read fd
 
       char buf[MAX_LENGTH];
 
       printf("Enter a message: ");
       scanf("%s", buf);
+
+      printf("[DEBUG][pid=%d] writing to fd[1]: %s\n", cpid, buf);
+      write(fd[1], buf, strlen(buf) + 1); // writing to fd[1]
+
+      exit(0);
+    } else { // main-process
+      printf("[DEBUG][pid=%d] forked pid = %d\n", cpid, pid);
+      close(fd[1]); // closing write fd
+
+      char buf[MAX_LENGTH];
+
+      read(fd[0], buf, sizeof(buf)); // reading from fd[0]
+      printf("[DEBUG][pid=%d] read from fork-process %s\n", cpid, buf);
 
       printf("[DEBUG][pid=%d] opening file output.txt with append mode\n",
              cpid);
@@ -42,31 +56,15 @@ int main() {
         exit(-1);
       }
       printf("[DEBUG][pid=%d] file successfuly opened\n", cpid);
-      ;
-
       fwrite(buf, strlen(buf), 1, file);
       fwrite("\n", strlen("\n"), 1, file);
-
-      printf("[DEBUG][pid=%d] writing to fd[1]: %s\n", cpid, buf);
-      write(fd[1], buf, strlen(buf) + 1); // writing to fd[1]
-
       fclose(file);
       printf("[DEBUG][pid=%d] file output.txt closed\n", cpid);
-
-      exit(0);
-    } else {        // main-process
-      close(fd[1]); // closing write fd
-
-      char buf[MAX_LENGTH];
-
-      read(fd[0], buf, sizeof(buf)); // reading from fd[0]
-      printf("[DEBUG][pid=%d] read from fork-process %s\n", cpid, buf);
-
       printf("Written string: %s\n", buf); // printing result
     }
 
     do {
-      printf("Want to enter one more message? (y/n) ");
+      printf("[pid=%d]Want to enter one more message? (y/n) ", cpid);
 
       scanf("%c", &answer);
 
