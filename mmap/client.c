@@ -1,3 +1,4 @@
+#include "shared.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,13 +17,18 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
-  int fd;
+  int fd, fdshm;
   void *fmem;
 
   char message[MEM_SIZE];
 
-  if ((fd = open(argv[1], O_WRONLY | O_EXCL | O_CREAT)) == -1) {
+  if ((fd = open(argv[1], O_WRONLY)) == -1) {
     perror("open");
+    exit(EXIT_FAILURE);
+  }
+
+  if (ftruncate(fd, MEM_SIZE) == -1) {
+    perror("ftruncate");
     exit(EXIT_FAILURE);
   }
 
@@ -32,6 +38,12 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
 
+  if ((fdshm = shm_open(SHARED_MEM_NAME, O_RDWR, 0)) == -1) {
+    perror("shm_open");
+    exit(EXIT_FAILURE);
+  }
+
+  printf("Enter message(max=4095 chars): ");
   fgets(message, MEM_SIZE, stdin);
 
   memcpy(message, fmem, MEM_SIZE);
