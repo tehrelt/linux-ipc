@@ -1,4 +1,3 @@
-#include "shared.h"
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +26,7 @@ char username[30];
 
 void handler(int sig) {
   if (shmid != -1 && *shm == CH_DISCONNECTED) {
-    printf("Removing shmid=%d\n", shmid);
+    printf("Shared memory removing [shmid=%d]\n", shmid);
     if (shmctl(shmid, IPC_RMID, NULL) == -1) {
       perror("shmctl");
       exit(1);
@@ -90,7 +89,6 @@ int main() {
 
   if (turn == 1) {
     *shm = CH_CONNECTED;
-    printf("shm = CH_CONNECTED\n");
   } else if (turn == 0) {
     fprintf(stdout, "Waiting opponent");
     *shm = CH_WAIT;
