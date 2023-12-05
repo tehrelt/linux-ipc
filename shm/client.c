@@ -156,12 +156,13 @@ int main() {
 
       printf("\n");
 
-      printf("%s: %s", shm + 1, shm + OFFSET);
-      printf("\n");
-
       if (*shm == CH_DISCONNECTED) {
         handler(SIG_DISCONNECTED);
       }
+
+      printf("%s: %s", shm + 1, shm + OFFSET);
+      printf("\n");
+
       turn = 1;
     }
   }
