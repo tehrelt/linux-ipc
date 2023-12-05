@@ -6,9 +6,6 @@
 #include <sys/shm.h>
 #include <unistd.h>
 
-#define U1 1
-#define U2 2
-
 #define SHM_KEY 1337
 #define SHM_SIZE 1024
 #define CH_WAIT 10
