@@ -68,4 +68,6 @@ int main(int argc, char **argv) {
     frame++;
     sleep(1);
   }
+
+  handler(0);
 }
